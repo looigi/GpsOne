@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="2dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:paddingTop="2dp"
+        android:orientation="vertical"
+        android:background="#000000"
+        tools:context=".MainActivity" >
+
+        <LinearLayout
+            android:id="@+id/layBarra"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bordo_arrotondato_bianco_sfumato_trasp"
+            android:weightSum="10"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgIndietro"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/icona_indietro" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtData"
+                android:layout_width="0dp"
+                android:layout_weight="8"
+                android:gravity="center_horizontal|center_vertical"
+                android:textColor="@color/colorPrimary"
+                android:textSize="20dp"
+                android:text="Data"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgAvanti"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/icona_avanti" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layBarraSezione"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_below="@+id/layBarra"
+            android:gravity="center_vertical"
+            android:background="@drawable/bordo_arrotondato_bianco_sfumato_trasp"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/laySezioni"
+                android:weightSum="10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/imgIndietroSezione"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/icona_indietro" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtSezione"
+                    android:layout_width="0dp"
+                    android:layout_weight="8"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="20dp"
+                    android:text="Data"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/imgAvantiSezione"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/icona_avanti" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <fragment
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/layBarraSezione"
+            android:id="@+id/map"
+            tools:context=".MapsActivity"
+            android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+        <ImageView
+            android:id="@+id/imgLinguettaSinistra"
+            android:layout_width="30dp"
+            android:layout_centerVertical="true"
+            android:layout_height="70dp"
+            android:background="@drawable/linguetta1"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/imgChiudi"
+            android:layout_width="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_height="30dp"
+            android:background="@drawable/logoff"
+            tools:ignore="ContentDescription" />
+
+        <LinearLayout
+            android:id="@+id/layImpostazioni"
+            android:background="@drawable/bordo_arrotondato_bianco_sfumato_trasp"
+            android:layout_width="200dp"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/layBarra"
+            >
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <Switch
+                        android:id="@+id/switchAccuracy"
+                        android:text="Accuracy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <Switch
+                        android:id="@+id/switchGPSBetter"
+                        android:text="GPS Better"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

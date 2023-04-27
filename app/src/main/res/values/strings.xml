@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">gpsOne</string>
+    <string name="toast_crash_report">Errore in GpsONE</string>
+</resources>
