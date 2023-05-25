@@ -1,17 +1,14 @@
 package com.looigi.gpsone;
 
-import android.app.Notification;
 import android.database.Cursor;
 import android.location.Location;
 import android.widget.TextView;
 
-import com.looigi.gpsone.notifiche.Notifica;
+import com.looigi.gpsone.Notifiche.GestioneNotifiche;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -74,11 +71,14 @@ public class Utility {
         VariabiliGlobali.getInstance().getTxtData().setText(VariabiliGlobali.getInstance().getOggi());
     }
 
-    public void ScriveSezioni(TextView txtSezione) {
-        if (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() == 0) {
-            txtSezione.setText("Tutte le sezioni (" + (VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1) + ")");
+    public void ScriveSezioni() {
+        TextView txtSezione = VariabiliGlobali.getInstance().getTxtSezione();
+
+        if (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() == -1) {
+            txtSezione.setText("Tutte (" + (VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1) + ")");
         } else {
-            txtSezione.setText("Sezione " + (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() + 1) + "/" + (VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1));
+            txtSezione.setText("Sezione " + (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() + 1) + "/" +
+                    (VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1));
         }
     }
 
@@ -86,7 +86,16 @@ public class Utility {
         String Titolo = "Attivo: " + VariabiliGlobali.getInstance().isServizioGPS() + " - Ultima rilevazione: " + VariabiliGlobali.getInstance().getUltimoPunto();
         String Titolo2 = "Punti rilevati: " + VariabiliGlobali.getInstance().getPuntiDisegnati() + " Sezioni: " + (VariabiliGlobali.getInstance().getSezioniGiorno() + 1);
 
-        if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
+        /*Notifica.getInstance().setTitolo(Titolo);
+        Notifica.getInstance().setTitolo2(Titolo2);
+        Notifica.getInstance().setContext(MainActivity.getAppContext());
+
+        Notifica.getInstance().AggiornaNotifica(); */
+        GestioneNotifiche.getInstance().setTitolo(Titolo);
+        GestioneNotifiche.getInstance().setTitolo2(Titolo2);
+        GestioneNotifiche.getInstance().AggiornaNotifica();
+
+        /* if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
             VariabiliGlobali.getInstance().getViewNotifica().setTextViewText(R.id.txtTitoloNotifica, Titolo);
             VariabiliGlobali.getInstance().getViewNotifica().setTextViewText(R.id.txtTitoloNotifica2, Titolo2);
             if (VariabiliGlobali.getInstance().isServizioGPS()) {
@@ -96,7 +105,7 @@ public class Utility {
             }
 
             Notifica.getInstance().AggiornaNotifica();
-        }
+        } */
 
         /* if (VariabiliGlobali.getInstance().getTxtCoords() != null) {
             if (locGPS != null) {
@@ -144,9 +153,13 @@ public class Utility {
                 // txtDataMappa.setText(oggi);
 
                 // Utility.getInstance().ScriveKM();
+                String Sezione = "";
+                if (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() != -1) {
+                    Sezione = Integer.toString(VariabiliGlobali.getInstance().getSezioneDaVisualizzare());
+                }
 
                 Cursor cP = null;
-                Cursor c1 = dbGpsPos.ottieniValoriGPSPerData(VariabiliGlobali.getInstance().getGiornoVisualizzato(), "");
+                Cursor c1 = dbGpsPos.ottieniValoriGPSPerData(VariabiliGlobali.getInstance().getGiornoVisualizzato(), Sezione);
                 if (c1 != null && c1.moveToFirst()) {
                     cP = c1;
                 }
@@ -163,7 +176,7 @@ public class Utility {
         }
     }
 
-    public void InstanziaNotifica() {
+    /* public void InstanziaNotifica() {
         Notifica.getInstance().RimuoviNotifica();
 
         Log.getInstance().ScriveLog("Instanzia notifica");
@@ -172,5 +185,5 @@ public class Utility {
         Notifica.getInstance().setTitolo("Attivo: " + VariabiliGlobali.getInstance().isServizioGPS() + " - Ultima rilevazione: " + VariabiliGlobali.getInstance().getUltimoPunto());
 
         Notifica.getInstance().CreaNotifica();
-    }
+    } */
 }

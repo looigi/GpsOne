@@ -1,5 +1,6 @@
-package com.looigi.gpsone.gps;
+/* package com.looigi.gpsone.gps;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -64,17 +65,30 @@ public class LocationService extends Service {
     }
 
     @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+
+        //do something you want
+        //stop service
+        stopForeground(true);
+        this.stopSelf();
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         MyLocationListener m = new MyLocationListener();
         m.AzionaServizio();
 
         VariabiliGlobali.getInstance().setMascheraAperta(false);
-        MainActivity.getAppActivity().moveTaskToBack(true);
+        Activity a = MainActivity.getAppActivity();
+        if (a != null) {
+            a.moveTaskToBack(true);
+        }
         VariabiliGlobali.getInstance().setePartito(true);
 
         // return super.onStartCommand(intent, flags, startId);
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -87,5 +101,8 @@ public class LocationService extends Service {
         super.onDestroy();
 
         VariabiliGlobali.getInstance().setServizioGPS(false);
+        // stopForeground(true);
+        // stopSelf();
     }
 }
+*/

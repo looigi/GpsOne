@@ -6,8 +6,8 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.looigi.gpsone.Log;
+import com.looigi.gpsone.Notifiche.GestioneNotifiche;
 import com.looigi.gpsone.VariabiliGlobali;
-import com.looigi.gpsone.notifiche.Notifica;
 
 import org.acra.ReportField;
 import org.acra.collector.CrashReportData;
@@ -38,7 +38,7 @@ public class CustomAcraSender implements ReportSenderFactory {
 	private class CustomReportSender implements ReportSender {
 		@Override
 		public void send(@NonNull Context context, @NonNull CrashReportData errorContent) throws ReportSenderException {
-			Notifica.getInstance().RimuoviNotifica();
+			GestioneNotifiche.getInstance().RimuoviNotifica();
 
 			String subject = "Crash GpsOne Android " + convertTimestampInDate(System.currentTimeMillis());
 			String body = parseLog(errorContent);

@@ -78,6 +78,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <Switch
+                    android:id="@+id/switchTutteSezioni"
+                    android:text="Tutte le sezioni"
+                    android:layout_width="0dp"
+                    android:layout_weight="4"
+                    android:layout_height="wrap_content" />
+
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -93,7 +100,7 @@
                 <TextView
                     android:id="@+id/txtSezione"
                     android:layout_width="0dp"
-                    android:layout_weight="8"
+                    android:layout_weight="4"
                     android:gravity="center_horizontal|center_vertical"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20dp"
@@ -165,11 +172,115 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
+                    <LinearLayout
+                        android:id="@+id/layAccuracy"
+                        android:orientation="horizontal"
+                        android:weightSum="2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:text="Accuracy"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/edtAccuracy"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ems="10"
+                            android:inputType="number" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:background="@android:color/darker_gray"/>
+
                     <Switch
                         android:id="@+id/switchGPSBetter"
                         android:text="GPS Better"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:id="@+id/layGPSBetter"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:weightSum="2"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:text="Tempo GPS"
+                                android:layout_height="wrap_content" />
+
+                            <EditText
+                                android:id="@+id/edtTempoGPS"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ems="10"
+                                android:inputType="number" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:weightSum="2"
+                            android:orientation="horizontal"
+                            android:layout_height="wrap_content">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_weight="1"
+                                android:text="Distanza GPS"
+                                android:layout_height="wrap_content" />
+
+                            <EditText
+                                android:id="@+id/edtDistanzaGPS"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ems="10"
+                                android:inputType="number" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:background="@android:color/darker_gray"/>
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:weightSum="4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="3"
+                            android:text="Elimina Percorso"
+                            android:layout_height="wrap_content" />
+
+                        <Button
+                            android:id="@+id/btnEliminaPercorso"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:text="..."
+                            android:layout_height="30dp" />
+                    </LinearLayout>
                 </LinearLayout>
             </ScrollView>
         </LinearLayout>

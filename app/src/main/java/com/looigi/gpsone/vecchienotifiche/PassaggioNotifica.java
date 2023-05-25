@@ -1,4 +1,4 @@
-package com.looigi.gpsone.notifiche;
+/* package com.looigi.gpsone.notifiche;
 
 import android.app.Activity;
 import android.content.Context;
@@ -53,7 +53,12 @@ public class PassaggioNotifica extends Activity {
 				case "cambioSezione":
 					VariabiliGlobali.getInstance().setSezione(VariabiliGlobali.getInstance().getSezione() + 1);
 					VariabiliGlobali.getInstance().setSezioniGiorno(VariabiliGlobali.getInstance().getSezioniGiorno() + 1);
+
+					VariabiliGlobali.getInstance().setSezioniGiornoVisualizzato(VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1);
+					VariabiliGlobali.getInstance().setSezioneDaVisualizzare(-1);
+
 					Utility.getInstance().ScriveDatiAVideo();
+					Utility.getInstance().ScriveSezioni();
 
 					moveTaskToBack(true);
 					break;
@@ -65,3 +70,4 @@ public class PassaggioNotifica extends Activity {
 		}
     }
 }
+*/

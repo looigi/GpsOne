@@ -45,7 +45,7 @@ public class VariabiliGlobali {
     private NotificationCompat.Builder notification;
     private boolean disegnatoPrimoPunto = false;
     private String ultimoPunto = "";
-    private RemoteViews viewNotifica;
+    // private RemoteViews viewNotifica;
     private String oggi;
     private boolean ImpostazioniAperte = false;
     private boolean ServizioGPS = true;
@@ -55,6 +55,8 @@ public class VariabiliGlobali {
     private int SezioneDaVisualizzare = 0;
     private int SezioniGiornoVisualizzato = 0;
     private String GiornoVisualizzato = "";
+    private TextView txtSezione;
+    private boolean ceSegnale = true;
 
     // Oggetti a video
     // private ImageView imgGps;
@@ -81,6 +83,22 @@ public class VariabiliGlobali {
     public void setContext(Context context) {
         this.context = context;
     } */
+
+    public boolean isCeSegnale() {
+        return ceSegnale;
+    }
+
+    public void setCeSegnale(boolean ceSegnale) {
+        this.ceSegnale = ceSegnale;
+    }
+
+    public TextView getTxtSezione() {
+        return txtSezione;
+    }
+
+    public void setTxtSezione(TextView txtSezione) {
+        this.txtSezione = txtSezione;
+    }
 
     public String getGiornoVisualizzato() {
         return GiornoVisualizzato;
@@ -154,13 +172,13 @@ public class VariabiliGlobali {
         this.txtData = txtData;
     }
 
-    public RemoteViews getViewNotifica() {
+    /* public RemoteViews getViewNotifica() {
         return viewNotifica;
     }
 
     public void setViewNotifica(RemoteViews viewNotifica) {
         this.viewNotifica = viewNotifica;
-    }
+    } */
 
     public String getUltimoPunto() {
         return ultimoPunto;
@@ -225,11 +243,6 @@ public class VariabiliGlobali {
 
     public void setAccuracyValue(int accuracyValue) {
         AccuracyValue = accuracyValue;
-
-        SharedPreferences sharedPref = MainActivity.getAppActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("Detector.AccuracyValue", this.AccuracyValue);
-        editor.apply();
     }
 
     public boolean isServizioGPS() {
@@ -286,11 +299,6 @@ public class VariabiliGlobali {
 
     public void setGPSBetter(boolean GPSBetter) {
         this.GPSBetter = GPSBetter;
-
-        SharedPreferences sharedPref = MainActivity.getAppActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("Detector.GPSBetter", GPSBetter);
-        editor.apply();
     }
 
     public boolean isAccuracy() {
@@ -299,11 +307,6 @@ public class VariabiliGlobali {
 
     public void setAccuracy(boolean accuracy) {
         Accuracy = accuracy;
-
-        SharedPreferences sharedPref = MainActivity.getAppActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("Detector.Accuracy", Accuracy);
-        editor.apply();
     }
 
     public int getTEMPO_GPS() {
@@ -320,11 +323,6 @@ public class VariabiliGlobali {
 
     public void setDISTANZA_GPS(int DISTANZA_GPS) {
         this.DISTANZA_GPS = DISTANZA_GPS;
-
-        SharedPreferences sharedPref = MainActivity.getAppActivity().getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("Detector.DistanzaGPS", this.DISTANZA_GPS);
-        editor.apply();
     }
 
     /* public ImageView getImgGps() {

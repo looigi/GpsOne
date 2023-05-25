@@ -141,6 +141,8 @@ public class db_dati {
     {
         try {
             if (myDB != null) {
+                myDB.execSQL("Delete From Impostazioni");
+
                 myDB.execSQL("INSERT INTO"
                         + " Impostazioni "
                         + " (accuracy, accuracyvalue, distanzagps, gpsbetter, tempogps)"
@@ -168,7 +170,7 @@ public class db_dati {
     public boolean caricaImpostazioni() {
         try {
             if (myDB != null) {
-                Cursor c1 = myDB.rawQuery("SELECT * FROM Impostazioni", null);
+                Cursor c1 = myDB.rawQuery("SELECT accuracy, accuracyvalue, distanzagps, gpsbetter, tempogps FROM Impostazioni", null);
                 c1.moveToFirst();
                 if (c1.getCount() > 0) {
                     VariabiliGlobali.getInstance().setAccuracy(c1.getString(0).equals("S"));
@@ -507,7 +509,7 @@ public class db_dati {
         };
         String whereClause = "data = ?";
         if (!Sezione.equals("")) {
-            whereClause = " and Sezione = ?";
+            whereClause += " and Sezione = ?";
         }
         String[] whereArgs;
         if (Sezione.equals("")) {
@@ -529,6 +531,25 @@ public class db_dati {
 
         }
         return c;
+    }
+
+    public boolean eliminaPercorso(String oggi, String Sezione) {
+        boolean Ok = true;
+        String altro = "data = '" + oggi + "'";
+        if (!Sezione.isEmpty()) {
+            altro += " and sezione=" + Sezione;
+        }
+        Log.getInstance().ScriveLog("Eliminazione percorso data " + oggi + " sezione " + Sezione);
+
+        if (myDB != null) {
+            try {
+                myDB.execSQL("Delete From " + DATABASE_TABELLA_GPS + " Where " + altro);
+            } catch (Exception e) {
+                Log.getInstance().ScriveLog("Eliminazione percorso errore: " + Utility.getInstance().PrendeErroreDaException(e));
+            }
+        }
+
+        return Ok;
     }
 
     public String contaValoriGPSPerData(String oggi)

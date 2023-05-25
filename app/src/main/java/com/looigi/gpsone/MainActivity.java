@@ -1,16 +1,25 @@
 package com.looigi.gpsone;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -20,10 +29,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Marker;
-import com.looigi.gpsone.gps.LocationService;
-import com.looigi.gpsone.notifiche.Notifica;
-
-import org.w3c.dom.Text;
+import com.looigi.gpsone.AutoStart.RunServiceOnBoot;
+import com.looigi.gpsone.Notifiche.GestioneNotifiche;
+import com.looigi.gpsone.Notifiche.InstanziamentoNotifica;
+// import com.looigi.gpsone.gps.LocationService;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -45,6 +54,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         MainActivity.context = getApplicationContext();
         MainActivity.activity = this;
+
+        Intent intent1 = new Intent(MainActivity.this, RunServiceOnBoot.class);
+        startService(intent1);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+            );
+            startActivityForResult(intent, 124);
+        }
 
         // VariabiliGlobali.getInstance().setContext(this);
         // VariabiliGlobali.getInstance().setFragmentActivityPrincipale(this);
@@ -131,9 +151,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // dbgps.PulisceDati();
 
         if (!VariabiliGlobali.getInstance().isePartito()) {
-            Utility.getInstance().InstanziaNotifica();
+            // Utility.getInstance().InstanziaNotifica();
 
-            startForegroundService(new Intent(getApplicationContext(), LocationService.class));
+            Intent intent = new Intent(this, InstanziamentoNotifica.class);
+            startService(intent);
         }
 
         /* VariabiliGlobali.getInstance().getFragmentActivityPrincipale().startService(new Intent(
@@ -152,7 +173,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         VariabiliGlobali.getInstance().setSezioneDaVisualizzare(0);
 
         TextView txtSezione = (TextView) findViewById(R.id.txtSezione);
-        Utility.getInstance().ScriveSezioni(txtSezione);
+        VariabiliGlobali.getInstance().setTxtSezione(txtSezione);
+        Utility.getInstance().ScriveSezioni();
 
         View fgmMappa = (View) findViewById(R.id.map);
 
@@ -161,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         ImageView imgIndietroSezione = (ImageView) findViewById(R.id.imgIndietroSezione);
         ImageView imgAvantiSezione = (ImageView) findViewById(R.id.imgAvantiSezione);
+        Switch switchTutteSezioni = (Switch) findViewById(R.id.switchTutteSezioni);
 
         ImageView imgIndietro = (ImageView) findViewById(R.id.imgIndietro);
         imgIndietro.setOnClickListener(new View.OnClickListener() {
@@ -176,19 +199,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     String oggi = formatter2.format(yesterdayDate);
                     VariabiliGlobali.getInstance().setGiornoVisualizzato(oggi);
                     VariabiliGlobali.getInstance().getTxtData().setText(oggi);
-                    Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
 
                     db_dati db = new db_dati();
                     String rit = db.contaValoriGPSPerData(oggi);
                     String[] r = rit.split(";");
                     // VariabiliGlobali.getInstance().setPuntiDisegnati(Integer.parseInt(r[0]));
                     VariabiliGlobali.getInstance().setSezioniGiornoVisualizzato(Integer.parseInt(r[1]));
-                    VariabiliGlobali.getInstance().setSezioneDaVisualizzare(0);
+                    VariabiliGlobali.getInstance().setSezioneDaVisualizzare(-1);
 
-                    imgAvantiSezione.setVisibility(LinearLayout.VISIBLE);
+                    imgAvantiSezione.setVisibility(LinearLayout.GONE);
                     imgIndietroSezione.setVisibility(LinearLayout.GONE);
+                    switchTutteSezioni.setChecked(true);
 
-                    Utility.getInstance().ScriveSezioni(txtSezione);
+                    Utility.getInstance().ScriveSezioni();
+                    Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
                 } catch (Exception e) {
                     Log.getInstance().ScriveLog("Errore nella conversione della data: " + Utility.getInstance().PrendeErroreDaException(e));
                 }
@@ -208,19 +232,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     String oggi = formatter2.format(yesterdayDate);
                     VariabiliGlobali.getInstance().setGiornoVisualizzato(oggi);
                     VariabiliGlobali.getInstance().getTxtData().setText(oggi);
-                    Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
 
                     db_dati db = new db_dati();
                     String rit = db.contaValoriGPSPerData(oggi);
                     String[] r = rit.split(";");
                     // VariabiliGlobali.getInstance().setPuntiDisegnati(Integer.parseInt(r[0]));
                     VariabiliGlobali.getInstance().setSezioniGiornoVisualizzato(Integer.parseInt(r[1]));
-                    VariabiliGlobali.getInstance().setSezioneDaVisualizzare(0);
+                    VariabiliGlobali.getInstance().setSezioneDaVisualizzare(-1);
 
-                    imgAvantiSezione.setVisibility(LinearLayout.VISIBLE);
+                    imgAvantiSezione.setVisibility(LinearLayout.GONE);
                     imgIndietroSezione.setVisibility(LinearLayout.GONE);
+                    switchTutteSezioni.setChecked(true);
 
-                    Utility.getInstance().ScriveSezioni(txtSezione);
+                    Utility.getInstance().ScriveSezioni();
+                    Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
                 } catch (Exception e) {
                     Log.getInstance().ScriveLog("Errore nella conversione della data: " + Utility.getInstance().PrendeErroreDaException(e));
                 }
@@ -256,42 +281,138 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        LinearLayout layAccuracy = (LinearLayout) findViewById(R.id.layAccuracy);
+        LinearLayout layGPSBetter = (LinearLayout) findViewById(R.id.layGPSBetter);
         Switch switchAccuracy = (Switch) findViewById(R.id.switchAccuracy);
+        Switch switchGPSBetter = (Switch) findViewById(R.id.switchGPSBetter);
+
         switchAccuracy.setChecked(VariabiliGlobali.getInstance().isAccuracy());
+        EditText edtAccuracy= (EditText) findViewById(R.id.edtAccuracy);
+        edtAccuracy.setText(Integer.toString(VariabiliGlobali.getInstance().getAccuracyValue()));
+        edtAccuracy.addTextChangedListener(new TextWatcher(){
+            public void afterTextChanged(Editable s) {
+                VariabiliGlobali.getInstance().setAccuracyValue(Integer.parseInt(edtAccuracy.getText().toString()));
+
+                db_dati db = new db_dati();
+                db.scriveImpostazioni();
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after){}
+            public void onTextChanged(CharSequence s, int start, int before, int count){}
+        });
+        if (VariabiliGlobali.getInstance().isAccuracy()) {
+            layAccuracy.setVisibility(LinearLayout.VISIBLE);
+            layGPSBetter.setVisibility(LinearLayout.GONE);
+            VariabiliGlobali.getInstance().setGPSBetter(false);
+            switchGPSBetter.setChecked(false);
+        } else {
+            layAccuracy.setVisibility(LinearLayout.GONE);
+            layGPSBetter.setVisibility(LinearLayout.VISIBLE);
+            VariabiliGlobali.getInstance().setGPSBetter(true);
+        }
         switchAccuracy.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                VariabiliGlobali.getInstance().setAccuracy(isChecked);
+
+               if (isChecked) {
+                   layAccuracy.setVisibility(LinearLayout.VISIBLE);
+                   layGPSBetter.setVisibility(LinearLayout.GONE);
+                   VariabiliGlobali.getInstance().setGPSBetter(false);
+                   switchGPSBetter.setChecked(false);
+               } else {
+                   layAccuracy.setVisibility(LinearLayout.GONE);
+                   layGPSBetter.setVisibility(LinearLayout.VISIBLE);
+                   VariabiliGlobali.getInstance().setGPSBetter(true);
+               }
 
                db_dati db = new db_dati();
                db.scriveImpostazioni();
            }
         });
 
-        Switch switchGPSBetter = (Switch) findViewById(R.id.switchGPSBetter);
+        EditText edtTempoGPS = (EditText) findViewById(R.id.edtTempoGPS);
+        edtTempoGPS.setText(Integer.toString(VariabiliGlobali.getInstance().getTEMPO_GPS()));
+        edtTempoGPS.addTextChangedListener(new TextWatcher(){
+            public void afterTextChanged(Editable s) {
+                VariabiliGlobali.getInstance().setTEMPO_GPS(Integer.parseInt(edtTempoGPS.getText().toString()));
+
+                db_dati db = new db_dati();
+                db.scriveImpostazioni();
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after){}
+            public void onTextChanged(CharSequence s, int start, int before, int count){}
+        });
+        EditText edtDistanzaGPS = (EditText) findViewById(R.id.edtDistanzaGPS);
+        edtDistanzaGPS.setText(Integer.toString(VariabiliGlobali.getInstance().getDISTANZA_GPS()));
+        edtDistanzaGPS.addTextChangedListener(new TextWatcher(){
+            public void afterTextChanged(Editable s) {
+                VariabiliGlobali.getInstance().setDISTANZA_GPS(Integer.parseInt(edtDistanzaGPS.getText().toString()));
+
+                db_dati db = new db_dati();
+                db.scriveImpostazioni();
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after){}
+            public void onTextChanged(CharSequence s, int start, int before, int count){}
+        });
+        if (VariabiliGlobali.getInstance().isGPSBetter()) {
+            layGPSBetter.setVisibility(LinearLayout.VISIBLE);
+            layAccuracy.setVisibility(LinearLayout.GONE);
+            VariabiliGlobali.getInstance().setAccuracy(false);
+            switchAccuracy.setChecked(false);
+        } else {
+            layGPSBetter.setVisibility(LinearLayout.GONE);
+            layAccuracy.setVisibility(LinearLayout.VISIBLE);
+            VariabiliGlobali.getInstance().setAccuracy(false);
+        }
         switchGPSBetter.setChecked(VariabiliGlobali.getInstance().isGPSBetter());
         switchGPSBetter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 VariabiliGlobali.getInstance().setGPSBetter(isChecked);
+
+                if (isChecked) {
+                    layGPSBetter.setVisibility(LinearLayout.VISIBLE);
+                    layAccuracy.setVisibility(LinearLayout.GONE);
+                    VariabiliGlobali.getInstance().setAccuracy(false);
+                    switchAccuracy.setChecked(false);
+                } else {
+                    layGPSBetter.setVisibility(LinearLayout.GONE);
+                    layAccuracy.setVisibility(LinearLayout.VISIBLE);
+                    VariabiliGlobali.getInstance().setAccuracy(false);
+                }
 
                 db_dati db = new db_dati();
                 db.scriveImpostazioni();
             }
         });
 
-        imgAvantiSezione.setVisibility(LinearLayout.VISIBLE);
+        imgAvantiSezione.setVisibility(LinearLayout.GONE);
         imgIndietroSezione.setVisibility(LinearLayout.GONE);
+
+        switchTutteSezioni.setChecked(true);
+        switchTutteSezioni.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    VariabiliGlobali.getInstance().setSezioneDaVisualizzare(-1);
+                    imgAvantiSezione.setVisibility(LinearLayout.GONE);
+                    imgIndietroSezione.setVisibility(LinearLayout.GONE);
+                } else {
+                    VariabiliGlobali.getInstance().setSezioneDaVisualizzare(VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato());
+                    imgAvantiSezione.setVisibility(LinearLayout.VISIBLE);
+                    imgIndietroSezione.setVisibility(LinearLayout.VISIBLE);
+                }
+
+                Utility.getInstance().ScriveSezioni();
+                Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
+            }
+        });
 
         imgIndietroSezione.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() > 0) {
                     VariabiliGlobali.getInstance().setSezioneDaVisualizzare(VariabiliGlobali.getInstance().getSezioneDaVisualizzare() - 1);
-                    imgAvantiSezione.setVisibility(LinearLayout.VISIBLE);
-                } else {
-                    VariabiliGlobali.getInstance().setSezioneDaVisualizzare(0);
-                    imgIndietroSezione.setVisibility(LinearLayout.GONE);
                 }
 
-                Utility.getInstance().ScriveSezioni(txtSezione);
+                Utility.getInstance().ScriveSezioni();
+                Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
             }
         });
 
@@ -299,21 +420,59 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View v) {
                 if (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() < VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato()) {
                     VariabiliGlobali.getInstance().setSezioneDaVisualizzare(VariabiliGlobali.getInstance().getSezioneDaVisualizzare() + 1);
-                    imgIndietroSezione.setVisibility(LinearLayout.VISIBLE);
-                } else {
-                    imgAvantiSezione.setVisibility(LinearLayout.GONE);
                 }
 
-                Utility.getInstance().ScriveSezioni(txtSezione);
+                Utility.getInstance().ScriveSezioni();
+                Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
             }
         });
 
         ImageView imgUscita = (ImageView) findViewById(R.id.imgChiudi);
         imgUscita.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Notifica.getInstance().RimuoviNotifica();
+                GestioneNotifiche.getInstance().RimuoviNotifica();
 
                 System.exit(0);
+            }
+        });
+
+        Button btnEliminaPercorso = (Button) findViewById(R.id.btnEliminaPercorso);
+        btnEliminaPercorso.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String altroMessaggio = "";
+                if (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() == -1) {
+                    altroMessaggio = "Si vuole eliminare il percorso completo del giorno ?";
+                } else {
+                    altroMessaggio = "Si vuole eliminare la sezione " + (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() + 1) + "/" +
+                            (VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1) + " del giorno ?";
+                }
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+                alert.setTitle("Eliminazione percorso");
+                alert.setMessage(altroMessaggio);
+                alert.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String sezione = "";
+                        if (VariabiliGlobali.getInstance().getSezioneDaVisualizzare() > -1) {
+                            sezione = Integer.toString(VariabiliGlobali.getInstance().getSezioneDaVisualizzare());
+                        }
+                        db_dati db = new db_dati();
+                        db.eliminaPercorso(VariabiliGlobali.getInstance().getGiornoVisualizzato(), sezione);
+
+                        Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
+
+                        dialog.dismiss();
+                    }
+                });
+                alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                alert.show();
             }
         });
 
@@ -326,11 +485,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             VariabiliGlobali.getInstance().setSezione(Integer.parseInt(r[1]));
 
             VariabiliGlobali.getInstance().setSezioniGiornoVisualizzato(Integer.parseInt(r[1]));
-            VariabiliGlobali.getInstance().setSezioneDaVisualizzare(0);
+            VariabiliGlobali.getInstance().setSezioneDaVisualizzare(-1);
         }
 
         Utility.getInstance().ScriveData();
-        Utility.getInstance().ScriveSezioni(txtSezione);
+        Utility.getInstance().ScriveSezioni();
     }
 
     @Override

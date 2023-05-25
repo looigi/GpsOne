@@ -1,4 +1,4 @@
-package com.looigi.gpsone.notifiche;
+/* package com.looigi.gpsone.notifiche;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -39,7 +39,10 @@ public class Notifica {
     private NotificationCompat.Builder notificationBuilder;
     private Context context;
     private String Titolo;
+    private String Titolo2;
+    private Boolean CeSegnale = false;
     private final int NOTIF_ID = 727272;
+    private RemoteViews contentView;
 
     public void setContext(Context context) {
         this.context = context;
@@ -47,6 +50,12 @@ public class Notifica {
 
     public void setTitolo(String titolo) {
         Titolo = titolo;
+    }
+
+    public void setCeSegnale(Boolean ceSegnale) { CeSegnale = ceSegnale; }
+
+    public void setTitolo2(String titolo) {
+        Titolo2 = titolo;
     }
 
     public void CreaNotifica() {
@@ -67,25 +76,19 @@ public class Notifica {
             if (notificationManager == null) {
                 notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel mChannel = notificationManager.getNotificationChannel(id);
-                if (mChannel == null) {
-                    mChannel = new NotificationChannel(id, title, NotificationManager.IMPORTANCE_LOW);
-                    mChannel.enableVibration(false);
-                    notificationManager.createNotificationChannel(mChannel);
-                }
+            // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 notificationBuilder = new NotificationCompat.Builder(context, id);
 
                 intent = new Intent(context, PassaggioNotifica.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-                RemoteViews contentView = new RemoteViews(MainActivity.getAppContext().getPackageName(),
+                contentView = new RemoteViews(MainActivity.getAppContext().getPackageName(),
                         R.layout.barra_notifica);
                 setListenersTasti(contentView);
                 setListeners(contentView);
 
-                VariabiliGlobali.getInstance().setViewNotifica(contentView);
+                // VariabiliGlobali.getInstance().setViewNotifica(contentView);
 
                 notificationBuilder
                         .setContentTitle(Titolo)                            // required
@@ -94,6 +97,8 @@ public class Notifica {
                         // .setDefaults(Notification.DEFAULT_ALL)
                         .setAutoCancel(false)
                         .setOngoing(true)
+                        .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                        .setOnlyAlertOnce(false)
                         // .setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                         // .setGroup("LOO'S WEB PLAYER")
                         // .setGroupSummary(true)
@@ -103,15 +108,10 @@ public class Notifica {
                         .setTicker("")
                         .setContent(contentView);
 
-            }
+            // }
 
             if (notificationBuilder != null) {
-                /* if (VariabiliGlobali.getInstance().isGiaAggiornatoNotifica()) {
-                    Notification notification = notificationBuilder.build();
-                    notificationManager.notify(NOTIF_ID, notification);
-                } else { */
                     VariabiliGlobali.getInstance().setNotification(notificationBuilder);
-                // }
             }
         } else {
             Log.getInstance().ScriveLog("Set Listeners. Context non valido");
@@ -126,8 +126,13 @@ public class Notifica {
             return;
         }
 
-        view.setTextViewText(R.id.txtTitoloNotifica, "");
-        view.setTextViewText(R.id.txtTitoloNotifica2, "");
+        view.setTextViewText(R.id.txtTitoloNotifica, Titolo);
+        view.setTextViewText(R.id.txtTitoloNotifica2, Titolo2);
+        if (CeSegnale) {
+            view.setViewVisibility(R.id.imgCeSegnale, LinearLayout.VISIBLE);
+        } else {
+            view.setViewVisibility(R.id.imgCeSegnale, LinearLayout.GONE);
+        }
 
         if (VariabiliGlobali.getInstance().isServizioGPS()) {
             view.setImageViewResource(R.id.imgPlayStop, R.drawable.icona_stop);
@@ -136,25 +141,48 @@ public class Notifica {
         }
     }
 
+    private int contatoreAggiornamenti = 0;
+
     public void AggiornaNotifica() {
-        setListenersTasti(VariabiliGlobali.getInstance().getViewNotifica());
-        if (notificationManager!=null && notificationBuilder != null) {
-            // Log.getInstance().ScriveLog("Aggiorna notifica");
-            notificationManager.notify(NOTIF_ID, notificationBuilder.build());
+        Log.getInstance().ScriveLog("Aggiorna notifica. Contatore: " + contatoreAggiornamenti);
+
+        if (contatoreAggiornamenti == 3) {
+            contatoreAggiornamenti = 0;
+            Log.getInstance().ScriveLog("Aggiorna notifica. Superato contatore. Ricreo la notifica");
+
+            RimuoviNotifica();
+            CreaNotifica();
+        } else {
+            contatoreAggiornamenti++;
+            if (contentView != null) {
+                setListeners(contentView); // VariabiliGlobali.getInstance().getViewNotifica());
+                setListenersTasti(contentView); // VariabiliGlobali.getInstance().getViewNotifica());
+
+                if (notificationManager != null && notificationBuilder != null) {
+                    // Log.getInstance().ScriveLog("Aggiorna notifica");
+                    try {
+                        notificationBuilder
+                                .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                                .setOnlyAlertOnce(false)
+                                .setTicker("")
+                                .setContent(contentView);
+
+                        notificationManager.notify(NOTIF_ID, notificationBuilder.build());
+                    } catch (Exception e) {
+                        Log.getInstance().ScriveLog("Aggiorna notifica errore: " + Utility.getInstance().PrendeErroreDaException(e));
+                    }
+                } else {
+                    Log.getInstance().ScriveLog("Aggiorna notifica errore di notificationManager null");
+                }
+            } else {
+                Log.getInstance().ScriveLog("Aggiorna notifica errore di contentView null");
+            }
         }
     }
 
     private void setListenersTasti(RemoteViews view){
         if (view != null) {
             Log.getInstance().ScriveLog("Set Listeners tasti. View corretta" );
-
-            /* Intent play=new Intent(context, PassaggioNotifica.class);
-            play.putExtra("DO", "play");
-            // play.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-            PendingIntent pplay = PendingIntent.getActivity(context, 0, play, PendingIntent.FLAG_UPDATE_CURRENT);
-            view.setOnClickPendingIntent(R.id.imgPlay, pplay);
-            // view.setImageViewResource(R.id.imgPlay, R.drawable.play);
-            */
 
             Intent apre = new Intent(context, PassaggioNotifica.class);
             apre.putExtra("DO", "apre");
@@ -190,3 +218,4 @@ public class Notifica {
         }
     }
 }
+*/

@@ -8,18 +8,15 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.looigi.gpsone.DisegnaMappa;
 import com.looigi.gpsone.Log;
 import com.looigi.gpsone.MainActivity;
-import com.looigi.gpsone.R;
+import com.looigi.gpsone.Notifiche.GestioneNotifiche;
 import com.looigi.gpsone.Utility;
 import com.looigi.gpsone.VariabiliGlobali;
-import com.looigi.gpsone.notifiche.Notifica;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,7 +25,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 public class MyLocationListener implements LocationListener {
     public MyLocationListener listener;
@@ -54,11 +50,31 @@ public class MyLocationListener implements LocationListener {
         getCurrentLocation();
     }
 
+    boolean primoPunto = true;
+
     @Override
     public void onLocationChanged(@NonNull Location loc) {
         if (VariabiliGlobali.getInstance().isServizioGPS()) {
-            if (VariabiliGlobali.getInstance().isAccuracy()) {
-                if (loc.getAccuracy() <= VariabiliGlobali.getInstance().getAccuracyValue()) {
+            float velocita = loc.getSpeed();
+            // if (velocita > 1 || primoPunto) {
+                primoPunto = false;
+                if (VariabiliGlobali.getInstance().isAccuracy()) {
+                    if (loc.getAccuracy() <= VariabiliGlobali.getInstance().getAccuracyValue()) {
+                        if (VariabiliGlobali.getInstance().isGPSBetter()) {
+                            if (isBetterLocation(loc, previousBestLocation)) {
+                                EsegueScritturaValori(loc);
+
+                                ScriveDistanze(loc);
+                                previousBestLocation = loc;
+                            }
+                        } else {
+                            EsegueScritturaValori(loc);
+
+                            ScriveDistanze(loc);
+                            previousBestLocation = loc;
+                        }
+                    }
+                } else {
                     if (VariabiliGlobali.getInstance().isGPSBetter()) {
                         if (isBetterLocation(loc, previousBestLocation)) {
                             EsegueScritturaValori(loc);
@@ -73,21 +89,7 @@ public class MyLocationListener implements LocationListener {
                         previousBestLocation = loc;
                     }
                 }
-            } else {
-                if (VariabiliGlobali.getInstance().isGPSBetter()) {
-                    if (isBetterLocation(loc, previousBestLocation)) {
-                        EsegueScritturaValori(loc);
-
-                        ScriveDistanze(loc);
-                        previousBestLocation = loc;
-                    }
-                } else {
-                    EsegueScritturaValori(loc);
-
-                    ScriveDistanze(loc);
-                    previousBestLocation = loc;
-                }
-            }
+            // }
         }
     }
 
@@ -141,13 +143,13 @@ public class MyLocationListener implements LocationListener {
         Log.getInstance().ScriveLog("Provider status changed: "+Integer.toString(status));
     }
 
-    Location lastLoc;
+    // Location lastLoc;
 
     private void EsegueScritturaValori(Location loc) {
         // // Log l = new Log(VariabiliGlobali.getInstance().getNomeLogGPS());
         Log.getInstance().ScriveLog("onLocationChanged: " + Double.toString(loc.getLatitude()) + " - " + Double.toString(loc.getLongitude()));
         try {
-            boolean ok = true;
+            /* boolean ok = true;
 
             if (lastLoc != null) {
                 double diffLat = Math.abs(loc.getLatitude() - lastLoc.getLatitude());
@@ -158,7 +160,7 @@ public class MyLocationListener implements LocationListener {
                 }
             }
 
-            if (ok) {
+            if (ok) { */
                 NumberFormat f2 = new DecimalFormat("00");
                 NumberFormat f3 = new DecimalFormat("000");
                 Calendar c = Calendar.getInstance();
@@ -178,9 +180,9 @@ public class MyLocationListener implements LocationListener {
                 Utility.getInstance().DisegnaPercorsoAttualeSuMappa();
 
                 Utility.getInstance().ScriveDatiAVideo();
-            }
+            // }
 
-            lastLoc = loc;
+            // lastLoc = loc;
             // }
         } catch (Exception e) {
             // StringWriter errors = new StringWriter();
@@ -195,21 +197,23 @@ public class MyLocationListener implements LocationListener {
         try {
             // if (VariabiliGlobali.getInstance().getImgGps()!=null) {
                 // VariabiliGlobali.getInstance().getImgGps().setVisibility(LinearLayout.VISIBLE);
-                VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.VISIBLE);
-                Notifica.getInstance().AggiornaNotifica();
+                // VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.VISIBLE);
+                VariabiliGlobali.getInstance().setCeSegnale(true);
+                GestioneNotifiche.getInstance().AggiornaNotifica();
             // }
             assert locationManager != null;
             isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
             Log.getInstance().ScriveLog("Get current location OK. GPS enabled " + isGpsEnabled + " - Network enabled "+isNetworkEnabled);
         } catch (Exception ex) {
-            Log.getInstance().ScriveLog("Get current location ERROR: "+ex.getMessage());
+            Log.getInstance().ScriveLog("Get current location ERROR: " + ex.getMessage());
             // if (VariabiliGlobali.getInstance().getImgGps()!=null) {
                 // VariabiliGlobali.getInstance().getImgGps().setVisibility(LinearLayout.GONE);
-            if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
-                VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.GONE);
-                Notifica.getInstance().AggiornaNotifica();
-            }
+            // if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
+            //     VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.GONE);
+                VariabiliGlobali.getInstance().setCeSegnale(false);
+                GestioneNotifiche.getInstance().AggiornaNotifica();
+            // }
             // }
             // ex.printStackTrace();
         }
@@ -222,29 +226,30 @@ public class MyLocationListener implements LocationListener {
         try {
             // if (VariabiliGlobali.getInstance().getImgGps()!=null) {
                 // VariabiliGlobali.getInstance().getImgGps().setVisibility(LinearLayout.VISIBLE);
-            if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
-                VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.VISIBLE);
-                Notifica.getInstance().AggiornaNotifica();
-            } else {
+            /* if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
+                VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.VISIBLE); */
+                VariabiliGlobali.getInstance().setCeSegnale(true);
+                GestioneNotifiche.getInstance().AggiornaNotifica();
+            /* } else {
                 Log.getInstance().ScriveLog("ERRORE: Notifica nulla...");
-            }
+            } */
             // }
             if (isGpsEnabled) {
-                try {
+                // try {
                     // VariabiliGlobali.getInstance().setAccuracyValue(25);
                     // VariabiliGlobali.getInstance().getsGPSBetter().setChecked(true);
-                    VariabiliGlobali.getInstance().setAccuracy(true);
+                    // VariabiliGlobali.getInstance().setAccuracy(true);
                     // VariabiliGlobali.getInstance().getEdtAccuracy().setText("25");
                     // VariabiliGlobali.getInstance().setDISTANZA_GPS(5, true);
                     // VariabiliGlobali.getInstance().getEdtMetriGPS().setText("5");
                     // VariabiliGlobali.getInstance().getsAccuracy().setChecked(VariabiliGlobali.getInstance().getsAccuracy().isChecked());
                     // VariabiliGlobali.getInstance().setGPSBetter(VariabiliGlobali.getInstance().getsGPSBetter().isChecked(), true);
-                    VariabiliGlobali.getInstance().setAccuracy(VariabiliGlobali.getInstance().isAccuracy());
+                    // VariabiliGlobali.getInstance().setAccuracy(VariabiliGlobali.getInstance().isAccuracy());
                     // VariabiliGlobali.getInstance().getBtnSalvaAcc().setEnabled(true);
                     // VariabiliGlobali.getInstance().getEdtAccuracy().setEnabled(true);
-                } catch (Exception  ignored) {
+                // } catch (Exception  ignored) {
 
-                }
+                // }
 
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                         VariabiliGlobali.getInstance().getTEMPO_GPS(),
@@ -289,10 +294,11 @@ public class MyLocationListener implements LocationListener {
             if (!isNetworkEnabled && !isGpsEnabled) {
                 // if (VariabiliGlobali.getInstance().getImgGps()!=null) {
                     // VariabiliGlobali.getInstance().getImgGps().setVisibility(LinearLayout.GONE);
-                if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
-                    VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.GONE);
-                    Notifica.getInstance().AggiornaNotifica();
-                }
+                // if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
+                    VariabiliGlobali.getInstance().setCeSegnale(false);
+                    // VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.GONE);
+                    GestioneNotifiche.getInstance().AggiornaNotifica();
+                // }
                 Log.getInstance().ScriveLog("Nessun provider impostato");
             }
 
@@ -301,11 +307,12 @@ public class MyLocationListener implements LocationListener {
             Log.getInstance().ScriveLog("locationManager ERROR: " + e.getMessage());
             // if (VariabiliGlobali.getInstance().getImgGps()!=null) {
                 // VariabiliGlobali.getInstance().getImgGps().setVisibility(LinearLayout.GONE);
-            if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
-                VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.GONE);
-                Notifica.getInstance().AggiornaNotifica();
-            }
-            e.printStackTrace();
+            // if (VariabiliGlobali.getInstance().getViewNotifica() != null) {
+                // VariabiliGlobali.getInstance().getViewNotifica().setViewVisibility(R.id.imgCeSegnale, LinearLayout.GONE);
+            VariabiliGlobali.getInstance().setCeSegnale(false);
+            GestioneNotifiche.getInstance().AggiornaNotifica();
+            // }
+            // e.printStackTrace();
         }
     }
 

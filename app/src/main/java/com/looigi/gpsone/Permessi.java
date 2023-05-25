@@ -29,6 +29,7 @@ public class Permessi {
                 // Manifest.permission.WAKE_LOCK,
                 // Manifest.permission.DISABLE_KEYGUARD,
                 Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                Manifest.permission.SYSTEM_ALERT_WINDOW
                 // android.Manifest.permission.ACCESS_COARSE_LOCATION,
         };
 
