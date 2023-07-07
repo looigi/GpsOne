@@ -41,6 +41,7 @@
         </activity>
 
         <activity android:name=".Notifiche.PassaggioNotifica" />
+        <service android:name=".Notifiche.GestioneNotifiche$NotificationActionService" />
 
         <service android:name=".Notifiche.InstanziamentoNotifica"
             android:stopWithTask="true" />

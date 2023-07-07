@@ -36,33 +36,13 @@ public class PassaggioNotifica extends Activity {
 					VariabiliGlobali.getInstance().setMascheraAperta(true);
 					// Utility.getInstance().CambiaMaschera(R.id.home);
 					break;
-				case "playStop":
-					boolean attivo = VariabiliGlobali.getInstance().isServizioGPS();
-					attivo = !attivo;
-					VariabiliGlobali.getInstance().setServizioGPS(attivo);
-					Utility.getInstance().ScriveDatiAVideo();
-
-					// Notifica.getInstance().setContext(VariabiliGlobali.getInstance().getContext());
-
-					moveTaskToBack(true);
-					break;
-				case "cambioSezione":
-					VariabiliGlobali.getInstance().setSezione(VariabiliGlobali.getInstance().getSezione() + 1);
-					VariabiliGlobali.getInstance().setSezioniGiorno(VariabiliGlobali.getInstance().getSezioniGiorno() + 1);
-
-					VariabiliGlobali.getInstance().setSezioniGiornoVisualizzato(VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1);
-					VariabiliGlobali.getInstance().setSezioneDaVisualizzare(-1);
-
-					Utility.getInstance().ScriveDatiAVideo();
-					Utility.getInstance().ScriveSezioni();
-
-					moveTaskToBack(true);
-					break;
 			}
 
 			if (Chiude) {
 				finish();
 			}
+		} else {
+			finish();
 		}
     }
 }

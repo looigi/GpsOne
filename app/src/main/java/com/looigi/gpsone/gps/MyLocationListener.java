@@ -38,8 +38,12 @@ public class MyLocationListener implements LocationListener {
         // mContext = getApplicationContext();
         if (locationManager == null) {
             try {
-                locationManager = (LocationManager) MainActivity.getAppActivity().getSystemService(Context.LOCATION_SERVICE);
-                Log.getInstance().ScriveLog("Location Manager creato");
+                if (MainActivity.getAppActivity() != null) {
+                    locationManager = (LocationManager) MainActivity.getAppActivity().getSystemService(Context.LOCATION_SERVICE);
+                    Log.getInstance().ScriveLog("Location Manager creato");
+                } else {
+                    Log.getInstance().ScriveLog("Location Manager NON creato: Activity non esistente");
+                }
             } catch (Exception e) {
                 StringWriter errors = new StringWriter();
                 e.printStackTrace(new PrintWriter(errors));
@@ -56,7 +60,7 @@ public class MyLocationListener implements LocationListener {
     public void onLocationChanged(@NonNull Location loc) {
         if (VariabiliGlobali.getInstance().isServizioGPS()) {
             float velocita = loc.getSpeed();
-            // if (velocita > 1 || primoPunto) {
+            if (velocita > .5 || primoPunto) {
                 primoPunto = false;
                 if (VariabiliGlobali.getInstance().isAccuracy()) {
                     if (loc.getAccuracy() <= VariabiliGlobali.getInstance().getAccuracyValue()) {
@@ -89,7 +93,7 @@ public class MyLocationListener implements LocationListener {
                         previousBestLocation = loc;
                     }
                 }
-            // }
+            }
         }
     }
 

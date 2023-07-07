@@ -4,12 +4,15 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.IBinder;
 import android.widget.RemoteViews;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.looigi.gpsone.Log;
@@ -70,9 +73,9 @@ public class GestioneNotifiche {
             assert manager != null;
             manager.createNotificationChannel(chan);
 
-            Intent intent = new Intent(ctx, PassaggioNotifica.class);
+            /* Intent intent = new Intent(ctx, PassaggioNotifica.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent pendingIntent = PendingIntent.getActivity(ctx, idNotifica, intent, 0);
+            PendingIntent pendingIntent = PendingIntent.getActivity(ctx, idNotifica, intent, 0); */
 
             contentView = new RemoteViews(ctx.getPackageName(), R.layout.barra_notifica);
             setListenersTasti(contentView);
@@ -105,7 +108,7 @@ public class GestioneNotifiche {
                     // .setGroupSummary(true)
                     // .setDefaults(NotificationCompat.DEFAULT_ALL)
                     // .setPriority(NotificationManager.IMPORTANCE_LOW)
-                    .setContentIntent(pendingIntent)
+                    // .setContentIntent(pendingIntent)
                     .setTicker("")
                     .setContent(contentView)
                     .build();
@@ -168,17 +171,71 @@ public class GestioneNotifiche {
             PendingIntent pApre = PendingIntent.getActivity(ctx, 0, apre, PendingIntent.FLAG_UPDATE_CURRENT);
             view.setOnClickPendingIntent(R.id.layBarraNotifica, pApre);
 
-            Intent playStop = new Intent(ctx, PassaggioNotifica.class);
+            Intent playStop = new Intent(ctx, NotificationActionService.class);
             playStop.putExtra("DO", "playStop");
-            PendingIntent pPlayStop= PendingIntent.getActivity(ctx, 1, playStop, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pPlayStop= PendingIntent.getService(ctx, 1, playStop, PendingIntent.FLAG_UPDATE_CURRENT);
             view.setOnClickPendingIntent(R.id.imgPlayStop, pPlayStop);
 
-            Intent cambioSezione = new Intent(ctx, PassaggioNotifica.class);
+            Intent cambioSezione = new Intent(ctx, NotificationActionService.class);
             cambioSezione.putExtra("DO", "cambioSezione");
-            PendingIntent pCambioSezione= PendingIntent.getActivity(ctx, 2, cambioSezione, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pCambioSezione= PendingIntent.getService(ctx, 2, cambioSezione, PendingIntent.FLAG_UPDATE_CURRENT);
             view.setOnClickPendingIntent(R.id.imgCambioSezione, pCambioSezione);
         } else {
             Log.getInstance().ScriveLog("Set Listeners tasti. View NON corretta" );
+        }
+    }
+
+    public static class NotificationActionService extends Service {
+        @Override
+        public void onCreate() {
+            super.onCreate();
+        }
+
+        @Override
+        public int onStartCommand(Intent intent, int flags, int startId) {
+            super.onStartCommand(intent, flags, startId);
+
+            String action="";
+
+            Log.getInstance().ScriveLog("Notifica: onCreate PassaggioNotifica");
+
+            try {
+                action = (String) intent.getExtras().get("DO");
+                Log.getInstance().ScriveLog("Notifica: Action: " + action);
+            } catch (Exception e) {
+                Log.getInstance().ScriveLog(Utility.getInstance().PrendeErroreDaException(e));
+            }
+
+            if (action!=null) {
+                boolean Chiude = true;
+
+                switch (action) {
+                    case "playStop":
+                        boolean attivo = VariabiliGlobali.getInstance().isServizioGPS();
+                        attivo = !attivo;
+                        VariabiliGlobali.getInstance().setServizioGPS(attivo);
+                        Utility.getInstance().ScriveDatiAVideo();
+                        break;
+                    case "cambioSezione":
+                        VariabiliGlobali.getInstance().setSezione(VariabiliGlobali.getInstance().getSezione() + 1);
+                        VariabiliGlobali.getInstance().setSezioniGiorno(VariabiliGlobali.getInstance().getSezioniGiorno() + 1);
+
+                        VariabiliGlobali.getInstance().setSezioniGiornoVisualizzato(VariabiliGlobali.getInstance().getSezioniGiornoVisualizzato() + 1);
+                        VariabiliGlobali.getInstance().setSezioneDaVisualizzare(-1);
+
+                        Utility.getInstance().ScriveDatiAVideo();
+                        Utility.getInstance().ScriveSezioni();
+                        break;
+                }
+            }
+
+            return START_NOT_STICKY;
+        }
+
+        @Nullable
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
         }
     }
 }
